@@ -1,4 +1,4 @@
-# ABEX-API
+# Trabalho-moretto
 
   * Primeiramente Intalar com o comando:
   * ```
@@ -8,11 +8,11 @@
   
   * ```
     POSTGRES_HOST=localhost
-    POSTGRES_DB=arni-api
+    POSTGRES_DB=loja
     POSTGRES_USERNAME=postgres
     POSTGRES_PASSWORD=unochapeco
     POSTGRES_PORT=5432
-    TOKEN_KEY=arni-api
+    TOKEN_KEY=moretto
     API_PORT=3333
     API_HOST=http://localhost
     ```
