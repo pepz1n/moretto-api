@@ -1,11 +1,12 @@
-import BaseModel from '../models/BaseModel';
+import UserModel from '../models/UserModel';
+import bcrypt from 'bcrypt'
 
 const get = async (req, res) => {
   try {
     const id = req.params.id ? req.params.id.toString().replace(/\D/g, '') : null;
 
     if (!id) {
-      const response = await BaseModel.findAll({
+      const response = await UserModel.findAll({
         order: [['id', 'asc']],
       });
       return res.status(200).send({
@@ -15,7 +16,7 @@ const get = async (req, res) => {
       });
     }
 
-    const response = await BaseModel.findOne({ where: { id } });
+    const response = await UserModel.findOne({ where: { id } });
 
     if (!response) {
       return res.status(200).send({
@@ -39,13 +40,60 @@ const get = async (req, res) => {
   }
 };
 
-const create = async (dados, res) => {
-  const { description, color, inactive } = dados;
+const register = async (req, res) => {
+  try {
+    const {
+      nome,
+      email,
+      senha,
+      cpf,
+      telefone,
+    } = req.body;
 
-  const response = await BaseModel.create({
-    description,
-    color,
-    inactive,
+    const verifyMail = UserModel.findOne({
+      where: { email },
+    });
+    if (verifyMail) {
+      return res.status(400).send({
+        message: 'Ja existe um usuario com este email!',
+        data: [],
+      });
+    }
+
+    const passwordHash = bcrypt.hash(senha, 10);
+
+    const response = await UserModel.create({
+      nome,
+      email,
+      passwordHash,
+      cpf,
+      telefone,
+    });
+
+    return res.status(201).send({
+      message: 'Conta Criada!',
+      data: [],
+    });
+  } catch (e) {
+    return res.status(500).send({
+      message: 'Erro no Servidor',
+      data: error.message,
+    });
+  }
+};
+
+const create = async (dados, res) => {
+  const {
+    country, state, city, neighborhood, street, postalCode,
+  } = dados;
+
+  const response = await UserModel.create({
+    country,
+    state,
+    city,
+    neighborhood,
+    street,
+    postalCode,
   });
 
   return res.status(200).send({
@@ -56,7 +104,7 @@ const create = async (dados, res) => {
 };
 
 const update = async (id, dados, res) => {
-  const response = await BaseModel.findOne({ where: { id } });
+  const response = await UserModel.findOne({ where: { id } });
 
   if (!response) {
     return res.status(200).send({
@@ -105,7 +153,7 @@ const destroy = async (req, res) => {
       });
     }
 
-    const response = await BaseModel.findOne({ where: { id } });
+    const response = await UserModel.findOne({ where: { id } });
 
     if (!response) {
       return res.status(200).send({
@@ -134,4 +182,5 @@ export default {
   get,
   persist,
   destroy,
+  register,
 };
