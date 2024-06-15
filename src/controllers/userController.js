@@ -1,5 +1,6 @@
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import UserModel from '../models/UserModel';
-import bcrypt from 'bcrypt'
 
 const get = async (req, res) => {
   try {
@@ -77,7 +78,50 @@ const register = async (req, res) => {
   } catch (e) {
     return res.status(500).send({
       message: 'Erro no Servidor',
-      data: error.message,
+      data: e.message,
+    });
+  }
+};
+
+const login = async (req, res) => {
+  try {
+    const {
+      email,
+      senha,
+    } = req.body;
+
+    const verifyUser = UserModel.findOne({
+      where: {
+        email,
+      },
+    });
+
+    if (!verifyUser) {
+      return res.status(400).send({
+        message: 'Usuario ou senha incorretos!',
+        data: [],
+      });
+    }
+
+    const response = bcrypt.compare(senha, verifyUser.passwordHash);
+
+    if (!response) {
+      return res.status(400).send({
+        message: 'Usuario ou senha incorretos!',
+        data: [],
+      });
+    }
+
+    const token = jwt.sign({ nome: verifyUser.nome, id: verifyUser.id }, process.env.TOKEN_KEY, { expiresIn: '5h' });
+
+    return res.status(200).send({
+      message: 'Usuario logado com sucesso',
+      data: token,
+    });
+  } catch (e) {
+    return res.status(500).send({
+      message: 'Erro no Servidor',
+      data: e.message,
     });
   }
 };
@@ -180,7 +224,8 @@ const destroy = async (req, res) => {
 
 export default {
   get,
+  login,
+  register,
   persist,
   destroy,
-  register,
 };
