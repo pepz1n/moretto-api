@@ -1,4 +1,5 @@
 import UsuarioPerfil from '../models/UsuarioPerfilModel';
+import { sequelize } from '../config/config';
 
 const get = async (req, res) => {
   try {
@@ -119,8 +120,50 @@ const destroy = async (req, res) => {
     });
   }
 };
+
+const getEditPerfisByUser = async (req, res) => {
+  try {
+    const idUsuario = req.params.idUsuario ? req.params.idUsuario.toString().replace(/\D/g, '') : null;
+
+    const perfisUsuarioNaoContem = await sequelize.query(`
+      select nome_perfil as "nomePerfil", id from perfis
+      where perfis.id not in (
+          select
+              id_perfil
+          from usuario_perfil
+          where id_usuario = ${idUsuario}
+          )
+    `).then((a) => a[0]);
+
+    const perfisUsuarioContem = await sequelize.query(`
+      select nome_perfil as "nomePerfil", perfis.id as "idPerfil", up.id as "idUsuarioPerfil" from perfis
+      join public.usuario_perfil up on perfis.id = up.id_perfil
+      where perfis.id in (
+          select
+              id_perfil
+          from usuario_perfil
+          where id_usuario = ${idUsuario}
+          )
+    `).then((a) => a[0]);
+
+    return res.status(200).send({
+      message: 'Dados Carregados com sucesso!',
+      data: {
+        perfisUsuarioNaoContem,
+        perfisUsuarioContem,
+      },
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: 'Ops! Ocorreu um erro',
+      error: error.message,
+    });
+  }
+};
+
 export default {
   get,
   persist,
   destroy,
+  getEditPerfisByUser,
 };
