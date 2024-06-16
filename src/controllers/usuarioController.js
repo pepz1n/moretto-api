@@ -1,13 +1,13 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import UserModel from '../models/UserModel';
+import UsuariosModel from '../models/UsuariosModel';
 
 const get = async (req, res) => {
   try {
     const id = req.params.id ? req.params.id.toString().replace(/\D/g, '') : null;
 
     if (!id) {
-      const response = await UserModel.findAll({
+      const response = await UsuariosModel.findAll({
         order: [['id', 'asc']],
       });
       return res.status(200).send({
@@ -17,7 +17,7 @@ const get = async (req, res) => {
       });
     }
 
-    const response = await UserModel.findOne({ where: { id } });
+    const response = await UsuariosModel.findOne({ where: { id } });
 
     if (!response) {
       return res.status(200).send({
@@ -44,14 +44,13 @@ const get = async (req, res) => {
 const register = async (req, res) => {
   try {
     const {
-      nome,
+      nomeCompleto,
       email,
       senha,
-      cpf,
-      telefone,
+      cpfCnpj,
     } = req.body;
 
-    const verifyMail = UserModel.findOne({
+    const verifyMail = await UsuariosModel.findOne({
       where: { email },
     });
     if (verifyMail) {
@@ -61,14 +60,13 @@ const register = async (req, res) => {
       });
     }
 
-    const passwordHash = bcrypt.hash(senha, 10);
+    const passwordHash = await bcrypt.hash(senha, 10);
 
-    const response = await UserModel.create({
-      nome,
+    await UsuariosModel.create({
+      nomeCompleto,
       email,
       passwordHash,
-      cpf,
-      telefone,
+      cpfCnpj,
     });
 
     return res.status(201).send({
@@ -90,7 +88,7 @@ const login = async (req, res) => {
       senha,
     } = req.body;
 
-    const verifyUser = UserModel.findOne({
+    const verifyUser = await UsuariosModel.findOne({
       where: {
         email,
       },
@@ -103,7 +101,7 @@ const login = async (req, res) => {
       });
     }
 
-    const response = bcrypt.compare(senha, verifyUser.passwordHash);
+    const response = await bcrypt.compare(senha, verifyUser.passwordHash);
 
     if (!response) {
       return res.status(400).send({
@@ -131,7 +129,7 @@ const create = async (dados, res) => {
     country, state, city, neighborhood, street, postalCode,
   } = dados;
 
-  const response = await UserModel.create({
+  const response = await UsuariosModel.create({
     country,
     state,
     city,
@@ -148,7 +146,7 @@ const create = async (dados, res) => {
 };
 
 const update = async (id, dados, res) => {
-  const response = await UserModel.findOne({ where: { id } });
+  const response = await UsuariosModel.findOne({ where: { id } });
 
   if (!response) {
     return res.status(200).send({
@@ -197,7 +195,7 @@ const destroy = async (req, res) => {
       });
     }
 
-    const response = await UserModel.findOne({ where: { id } });
+    const response = await UsuariosModel.findOne({ where: { id } });
 
     if (!response) {
       return res.status(200).send({
