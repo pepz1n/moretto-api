@@ -8,7 +8,7 @@
   
   * ```
     POSTGRES_HOST=localhost
-    POSTGRES_DB=loja
+    POSTGRES_DB=morreto
     POSTGRES_USERNAME=postgres
     POSTGRES_PASSWORD=unochapeco
     POSTGRES_PORT=5432
@@ -20,4 +20,5 @@
   * ```
     npm run dev
     ```
+  * Descomentar o INDEX.jS de MODELS para criacao das tabelas
     
