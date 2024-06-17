@@ -1,6 +1,8 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import UsuariosModel from '../models/UsuariosModel';
+import Usuarios from '../models/UsuariosModel';
+import { sequelize } from '../config/config';
 
 const get = async (req, res) => {
   try {
@@ -182,10 +184,73 @@ const destroy = async (req, res) => {
   }
 };
 
+const getdataByToken = async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    const response = {
+      message: 'Conta encontrada',
+      data: {},
+    };
+
+    if (!token) {
+      return res.status(401).send({
+        message: 'Token nao existe!',
+        data: null,
+      });
+    }
+
+    const user = jwt.verify(token, process.env.TOKEN_KEY);
+
+    if (!user.id) {
+      return res.status(401).send({
+        message: 'Id nao encontrado',
+        data: null,
+      });
+    }
+
+    const verifyUser = await Usuarios.findOne({
+      where: {
+        id: user.id,
+      },
+    });
+
+    if (!verifyUser) {
+      return res.status(401).send({
+        message: 'Usuario nao encontrado',
+        data: null,
+      });
+    }
+
+    response.data = verifyUser.toJSON();
+
+    const verifyUserAdmin = await sequelize.query(`
+      select
+          p.nome_perfil as "nomePerfil"
+      from usuario_perfil up
+      join perfis p on up.id_perfil = p.id
+      where up.id_usuario = ${user.id} and (p.nome_perfil = 'Admin' or p.nome_perfil = 'admin')
+    `).then((a) => a[0]);
+
+    if (!verifyUserAdmin.length) {
+      response.data.cargo = 'User';
+    } else {
+      response.data.cargo = 'Admin';
+    }
+
+    return res.status(200).send(response);
+  } catch (e) {
+    return res.status(500).send({
+      message: 'Ops! Ocorreu um erro',
+      data: null,
+    });
+  }
+};
+
 export default {
   get,
   login,
   register,
   update,
   destroy,
+  getdataByToken,
 };
