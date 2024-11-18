@@ -3,8 +3,10 @@ import Usuarios from '../models/UsuariosModel';
 
 export default async (req, res, next) => {
   try {
+    console.log(req.headers.authorization);
+    
     const token = req.headers.authorization.split(' ')[1];
-
+    
     if (!token) {
       return res.status(401).send({
         message: 'Token nao existe!',
@@ -30,6 +32,7 @@ export default async (req, res, next) => {
         message: 'Acesso negado!',
       });
     }
+    
     return next();
   } catch (error) {
     return res.status(500).send({

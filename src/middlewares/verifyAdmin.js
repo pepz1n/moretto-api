@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import Usuarios from '../models/UsuariosModel';
 import { sequelize } from '../config/config';
 
 export default async (req, res, next) => {
@@ -19,6 +18,7 @@ export default async (req, res, next) => {
         message: 'Acesso negado!',
       });
     }
+    console.log('oi');
     const verifyUserAdmin = await sequelize.query(`
       select
           p.nome_perfil as "nomePerfil"
@@ -26,12 +26,13 @@ export default async (req, res, next) => {
       join perfis p on up.id_perfil = p.id
       where up.id_usuario = ${user.id} and (p.nome_perfil = 'Admin' or p.nome_perfil = 'admin')
     `).then((a) => a[0]);
-
+    
     if (!verifyUserAdmin.length) {
       return res.status(401).send({
         message: 'Acesso negado!',
       });
     }
+    
     return next();
   } catch (error) {
     return res.status(500).send({

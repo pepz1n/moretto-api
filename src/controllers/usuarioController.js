@@ -239,6 +239,7 @@ const getdataByToken = async (req, res) => {
 
     return res.status(200).send(response);
   } catch (e) {
+    console.log(e.message);
     return res.status(500).send({
       message: 'Ops! Ocorreu um erro',
       data: null,
