@@ -1,3 +1,4 @@
+import { sequelize } from '../config/config';
 import FavoritosModel from '../models/FavoritosModel';
 
 const get = async (req, res) => {
@@ -5,9 +6,21 @@ const get = async (req, res) => {
     const id = req.params.id ? req.params.id.toString().replace(/\D/g, '') : null;
 
     if (!id) {
-      const response = await FavoritosModel.findAll({
-        order: [['id', 'asc']],
-      });
+      // const response = await FavoritosModel.findAll({
+      //   order: [['id', 'asc']],
+      // });
+
+      const response = await sequelize.query(`
+        SELECT
+          t.id,
+          t.id_usuario as "idUsuario",
+          t.id_produto as "idProduto",
+          u.nome_completo as "nomeUsuario",
+          p.nome_produto as "nomeProduto"
+        FROM favoritos t
+        join usuarios u on t.id_usuario = u.id
+        join produtos p on t.id_produto = p.id
+      `).then((data) => data[0]);
       return res.status(200).send({
         message: 'Registros carregados com sucesso',
         data: response,
