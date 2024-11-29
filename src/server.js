@@ -37,6 +37,4 @@ app.use((req, res) => {
   res.status(404).send('404 - Página não encontrada');
 });
 
-app.listen(process.env.API_PORT, () => {
-  console.log(`ABEX API running in ${process.env.API_PORT}`);
-});
+export default app;

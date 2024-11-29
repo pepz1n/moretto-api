@@ -8,6 +8,8 @@ const get = async (req, res) => {
       const response = await ProdutosModel.findAll({
         order: [['id', 'asc']],
       });
+
+
       return res.status(200).send({
         message: 'Registros carregados com sucesso',
         data: response,
@@ -28,12 +30,14 @@ const get = async (req, res) => {
       data: response,
     });
   } catch (error) {
+    console.error('Erro ao processar a requisição:', error);  // Logando erro detalhado
     return res.status(500).send({
       message: 'Ops! Ocorreu um erro',
       error: error.message,
     });
   }
 };
+
 
 const create = async (dados, res) => {
   const {
